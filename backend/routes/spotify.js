@@ -2,13 +2,12 @@ const express = require("express");
 const axios = require("axios");
 const querystring = require("querystring");
 const router = express.Router();
-require("dotenv").config(); 
-
+const Token = require("../models/Token"); 
+require("dotenv").config();
 
 const client_id = process.env.SPOTIFY_CLIENT_ID;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
-const redirect_uri = " https://4fca-2603-9001-e00-1e2f-ac0b-d666-3fdb-ad20.ngrok-free.app "; 
-
+const redirect_uri = "https://b91a-2603-9001-e00-1e2f-3d18-36fa-16bc-47f2.ngrok-free.app";
 
 router.get("/login", (req, res) => {
   const scope = "user-read-private user-read-email";
@@ -42,9 +41,15 @@ router.get("/callback", async (req, res) => {
       }
     );
 
-    const { access_token, refresh_token } = response.data;
+    const { access_token, refresh_token, expires_in } = response.data;
 
-    res.json({ access_token, refresh_token });
+    await Token.create({
+      access_token,
+      refresh_token,
+      expires_in
+    });
+
+    res.json({ access_token, refresh_token, expires_in });
   } catch (err) {
     console.error("Error getting tokens from Spotify:", err.response?.data || err.message);
     res.status(500).json({ error: "Failed to get access token" });
