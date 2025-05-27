@@ -2,7 +2,8 @@ const express = require("express");
 const axios = require("axios");
 const querystring = require("querystring");
 const router = express.Router();
-const Token = require("../models/Token"); 
+const Token = require("../models/Token");
+const validateToken = require("../middleware/validateToken");
 require("dotenv").config();
 
 const client_id = process.env.SPOTIFY_CLIENT_ID;
@@ -46,13 +47,36 @@ router.get("/callback", async (req, res) => {
     await Token.create({
       access_token,
       refresh_token,
-      expires_in
+      expires_in,
     });
 
     res.json({ access_token, refresh_token, expires_in });
   } catch (err) {
     console.error("Error getting tokens from Spotify:", err.response?.data || err.message);
     res.status(500).json({ error: "Failed to get access token" });
+  }
+});
+
+router.get("/search", validateToken, async (req, res) => {
+  const { q } = req.query;
+  if (!q) return res.status(400).json({ error: "Missing search query" });
+
+  try {
+    const response = await axios.get("https://api.spotify.com/v1/search", {
+      headers: {
+        Authorization: `Bearer ${req.spotifyToken}`,
+      },
+      params: {
+        q,
+        type: "artist,track,album",
+        limit: 3,
+      },
+    });
+
+    res.json(response.data);
+  } catch (err) {
+    console.error("Spotify search error:", err.response?.data || err.message);
+    res.status(500).json({ error: "Search failed" });
   }
 });
 
