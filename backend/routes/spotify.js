@@ -8,7 +8,7 @@ require("dotenv").config();
 
 const client_id = process.env.SPOTIFY_CLIENT_ID;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
-const redirect_uri = "https://b91a-2603-9001-e00-1e2f-3d18-36fa-16bc-47f2.ngrok-free.app";
+const redirect_uri = "https://a50f-2603-9001-e00-1e2f-586b-d176-bfd2-4794.ngrok-free.app/callback";
 
 router.get("/login", (req, res) => {
   const scope = "user-read-private user-read-email";
